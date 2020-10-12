@@ -2,6 +2,7 @@ import matplotlib.pyplot as plt
 import random
 import numpy as np
 import time
+import re
 
 import json
 import sys
@@ -24,27 +25,25 @@ class Player(object):
             2: self.moveDown,
             3: self.moveUp,
         }
-        self._nbStates = 81  # 9 * 9 positions
-        self._nbActions = 4
         self._qtable = dict()
         self._discount = 0.9  # 0.8 - 0.99
-        self._epsilon = 0.5
-        self._learning_rate = 0.1
+        self._epsilon = 0.02 # low value little explore
+        self._learning_rate = 0.2
 
     def moveLeft(self, arg):
-        self._x = self._x + 1.0
+        self._x = self._x + 1
         return "Left, {0}!".format(arg)
 
     def moveRight(self, arg):
-        self._x = self._x - 1.0
+        self._x = self._x - 1
         return "Right, {0}!".format(arg)
 
     def moveDown(self, arg):
-        self._y = self._y - 1.0
+        self._y = self._y - 1
         return "Down, {0}!".format(arg)
 
     def moveUp(self, arg):
-        self._y = self._y + 1.0
+        self._y = self._y + 1
         return "Up, {0}!".format(arg)
 
     def getCircle(self):
@@ -77,6 +76,17 @@ class Player(object):
     def state(self):
         return (self._x, self._y)
 
+    def read_values(self, path="data/qtable.json"):
+        self._qtable = dict()
+        with open(path, "r") as inputFile:
+            for line in inputFile.readlines():
+                matchObj = re.match(r'\((\-?\d+),\s(\-?\d)\)\:(\-?\d*(\.\d+)?).*', line)
+                x = int(matchObj.group(1))
+                y = int(matchObj.group(2))
+                qvalue = float(matchObj.group(3))
+                self._qtable[tuple([x, y])] = qvalue
+        print(self._qtable)
+
     def save_values(self, path="data/qtable.json"):
         """ Save Q values to json."""
         a = list(self._qtable)
@@ -86,10 +96,10 @@ class Player(object):
 
     def reward(self, winner):
         if winner == self._name:
-            return 50.0
+            return 500.0
         if self.gameOver(winner):
             return -100.0
-        return -0.5
+        return -5
 
     def gameOver(self, winner):
         if winner:

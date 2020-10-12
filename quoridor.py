@@ -44,17 +44,24 @@ class Quoridor(object):
 
     def play(self):
         for i in range(100):
-            self.player1.play()
+            winner, reward = self.player1.step()
+            if (self.player1.gameOver(winner)):
+                print("Game Lost")
+                self.player1.reset()
             #self.player2.play()
-            input("Press [enter] to continue")
+            #input("Press [enter] to continue")
+            time.sleep(0.3)
             self.plot()
         print("Finished Game")
 
     def run(self):
-        self.player1.train(500000)
+        #self.player1.train(10000)
+        self.player1.read_values(path="data/simple_1000000.json")
+        self.play()
 
-    def printHello(self):
-        print("Hello")
+    def trainAgent(self):
+        self.player1.train(1000000)
+        self.player1.save_values()
 
 
 if __name__ == "__main__":
